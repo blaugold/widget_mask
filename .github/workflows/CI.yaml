@@ -1,0 +1,45 @@
+name: CI
+
+env:
+  FLUTTER_VERSION: '2.2.3'
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Install Flutter
+        run: |
+          FLUTTER_HOME="$HOME/opt/flutter"
+          FLUTTER_BINS="$FLUTTER_HOME/bin"
+          git clone --depth 1 -b "$FLUTTER_VERSION" https://github.com/flutter/flutter.git  "$FLUTTER_HOME"
+                    
+          echo "$FLUTTER_BINS" >> "$GITHUB_PATH"
+          echo "$HOME/.pub-cache/bin" >> "$GITHUB_PATH"
+          "$FLUTTER_BINS/flutter" --version
+
+      - name: Install pub dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: flutter format --set-exit-if-changed .
+
+      - name: Analyze Dart code
+        run: flutter analyze
+
+      - name: Run unit tests
+        run: flutter test
+
+      - name: Run example unit tests
+        working-directory: example
+        run: flutter test

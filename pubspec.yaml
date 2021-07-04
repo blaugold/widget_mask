@@ -1,0 +1,20 @@
+name: widget_mask
+description: Use a widget to mask and blend another widget, for example
+  to imprint text onto surfaces.
+version: 0.1.0
+repository: https://github.com/blaugold/widget_mask
+issue_tracker: https://github.com/blaugold/widget_mask/issues
+
+environment:
+  sdk: '>=2.12.0 <3.0.0'
+  flutter: '>=1.17.0'
+
+dependencies:
+  collection: ^1.15.0
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pedantic: ^1.11.1
