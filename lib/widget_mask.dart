@@ -25,8 +25,9 @@ class WidgetMask extends MultiChildRenderObjectWidget {
   WidgetMask({
     Key? key,
     this.blendMode = BlendMode.srcOver,
-    required Widget mask,
-    required Widget child,
+    this.childSaveLayer = false,
+    required this.mask,
+    required this.child,
   }) : super(key: key, children: [child, mask]);
 
   /// The [BlendMode] to use when blending the [mask] save layer with [child].
@@ -34,22 +35,50 @@ class WidgetMask extends MultiChildRenderObjectWidget {
   /// In the context of this widget [mask] is the `src` and [child] the `dst`.
   final BlendMode blendMode;
 
+  /// Whether to paint [child] in its own save layer.
+  ///
+  /// This allows you to blend [child] and [mask] without the transparent
+  /// areas of [child] influencing the result.
+  ///
+  /// Enabling this option impacts performance, since it adds another save layer
+  /// and should only be done if necessary.
+  final bool childSaveLayer;
+
+  /// The widget which is painted over the [child] widget, in a save layer with
+  /// [BlendMode] [blendMode].
+  final Widget mask;
+
+  /// The widget which determines the size of this widget and is painted behind
+  /// the [mask] widget.
+  final Widget child;
+
   @override
-  RenderObject createRenderObject(BuildContext context) =>
-      _RenderWidgetMask(blendMode: blendMode);
+  RenderObject createRenderObject(BuildContext context) => _RenderWidgetMask(
+        blendMode: blendMode,
+        childSaveLayer: childSaveLayer,
+      );
 
   @override
   void updateRenderObject(
     BuildContext context,
     covariant _RenderWidgetMask renderObject,
   ) {
-    renderObject.blendMode = blendMode;
+    renderObject
+      ..blendMode = blendMode
+      ..childSaveLayer = childSaveLayer;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty('blendMode', blendMode));
+    properties
+      ..add(EnumProperty('blendMode', blendMode))
+      ..add(FlagProperty(
+        'childSaveLayer',
+        value: childSaveLayer,
+        ifTrue: 'CHILD-SAVE-LAYER',
+        defaultValue: false,
+      ));
   }
 }
 
@@ -59,7 +88,11 @@ class _RenderWidgetMask extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _WidgetMaskParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _WidgetMaskParentData> {
-  _RenderWidgetMask({required BlendMode blendMode}) : _blendMode = blendMode;
+  _RenderWidgetMask({
+    required BlendMode blendMode,
+    required bool childSaveLayer,
+  })  : _blendMode = blendMode,
+        _childSaveLayer = childSaveLayer;
 
   @override
   void setupParentData(covariant RenderBox child) {
@@ -77,6 +110,16 @@ class _RenderWidgetMask extends RenderBox
   set blendMode(BlendMode blendMode) {
     if (_blendMode != blendMode) {
       _blendMode = blendMode;
+      markNeedsPaint();
+    }
+  }
+
+  bool get childSaveLayer => _childSaveLayer;
+  bool _childSaveLayer;
+
+  set childSaveLayer(bool childSaveLayer) {
+    if (_childSaveLayer != childSaveLayer) {
+      _childSaveLayer = childSaveLayer;
       markNeedsPaint();
     }
   }
@@ -126,11 +169,18 @@ class _RenderWidgetMask extends RenderBox
 
   @override
   void paint(PaintingContext context, Offset offset) {
+    if (_childSaveLayer) {
+      context.canvas.saveLayer(offset & size, Paint());
+    }
     context.paintChild(_child, offset);
 
     context.canvas.saveLayer(offset & size, Paint()..blendMode = blendMode);
     context.paintChild(_mask, offset);
     context.canvas.restore();
+
+    if (_childSaveLayer) {
+      context.canvas.restore();
+    }
   }
 
   @override
@@ -143,23 +193,40 @@ class _RenderWidgetMask extends RenderBox
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(EnumProperty<BlendMode>('blendMode', blendMode));
+    properties
+      ..add(EnumProperty<BlendMode>('blendMode', blendMode))
+      ..add(FlagProperty(
+        'childSaveLayer',
+        value: childSaveLayer,
+        ifTrue: 'CHILD-SAVE-LAYER',
+        defaultValue: false,
+      ));
   }
 
   void _debugMaskDoesNotNeedCompositing() {
-    if (_mask.needsCompositing) {
+    void _throwErrorFor(RenderObject renderObject, String name) {
       throw FlutterError.fromParts([
-        ErrorSummary('`WidgetMask.mask` cannot contain compositing layers.'),
+        ErrorSummary('`WidgetMask.$name` cannot contain compositing layers.'),
         ErrorDescription(
-          'The save layer into which `mask` is painted cannot encompass '
+          'The save layer into which `$name` is painted cannot encompass '
           'compositing layers.',
         ),
         ErrorHint(
-          'Ensure `WidgetMask.mask` contains no widgets which need '
+          'Ensure `WidgetMask.$name` contains no widgets which need '
           'compositing, such as `RepaintBoundary`.',
         ),
-        _leafCompositingRenderObjects(_mask).first.describeForError('')
+        _leafCompositingRenderObjects(renderObject).first.describeForError('')
       ]);
+    }
+
+    if (_mask.needsCompositing) {
+      _throwErrorFor(_mask, 'mask');
+    }
+
+    if (_childSaveLayer) {
+      if (_child.needsCompositing) {
+        _throwErrorFor(_child, 'child');
+      }
     }
   }
 }
