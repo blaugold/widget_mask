@@ -51,6 +51,37 @@ void main() {
     );
   });
 
+  testWidgets(
+    'child save layer allows blending of child without background',
+    (tester) async {
+      await tester.pumpWidget(
+        Container(
+          color: Colors.white,
+          alignment: Alignment.center,
+          child: WidgetMask(
+            childSaveLayer: true,
+            blendMode: BlendMode.dstOver,
+            mask: const Square(
+              color: Colors.red,
+            ),
+            child: const Padding(
+              padding: EdgeInsets.all(50),
+              child: Square(
+                size: 200,
+                color: Colors.green,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await expectLater(
+        find.byType(WidgetMask),
+        matchesGoldenFile('goldens/child_save_layer.png'),
+      );
+    },
+  );
+
   testWidgets('mask which contains layer throws debug error', (tester) async {
     await tester.pumpWidget(
       Center(
@@ -99,6 +130,33 @@ void main() {
       matchesGoldenFile('goldens/child_with_layer.png'),
     );
   });
+
+  testWidgets(
+    'child with save layer, which contains layer throws debug error',
+    (tester) async {
+      await tester.pumpWidget(
+        Center(
+          child: WidgetMask(
+            childSaveLayer: true,
+            blendMode: BlendMode.difference,
+            mask: const Center(
+              child: Square(
+                color: Colors.white,
+              ),
+            ),
+            child: const RepaintBoundary(
+              child: Square(
+                size: 200,
+                color: Colors.green,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(tester.takeException(), isFlutterError);
+    },
+  );
 
   testWidgets('mask is hit tested before child', (tester) async {
     var didHitMask = false;
