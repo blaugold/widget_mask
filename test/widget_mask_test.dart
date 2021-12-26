@@ -1,6 +1,5 @@
 // ignore_for_file: diagnostic_describe_all_properties
 
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:widget_mask/widget_mask.dart';
@@ -8,12 +7,12 @@ import 'package:widget_mask/widget_mask.dart';
 void main() {
   testWidgets('default blend mode', (tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: WidgetMask(
-          mask: const Center(
+          mask: Center(
             child: Square(),
           ),
-          child: const Square(
+          child: Square(
             size: 200,
             color: Colors.green,
           ),
@@ -29,15 +28,15 @@ void main() {
 
   testWidgets('custom blend mode', (tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: WidgetMask(
           blendMode: BlendMode.difference,
-          mask: const Center(
+          mask: Center(
             child: Square(
               color: Colors.white,
             ),
           ),
-          child: const Square(
+          child: Square(
             size: 200,
             color: Colors.green,
           ),
@@ -58,13 +57,13 @@ void main() {
         Container(
           color: Colors.white,
           alignment: Alignment.center,
-          child: WidgetMask(
+          child: const WidgetMask(
             childSaveLayer: true,
             blendMode: BlendMode.dstOver,
-            mask: const Square(
+            mask: Square(
               color: Colors.red,
             ),
-            child: const Padding(
+            child: Padding(
               padding: EdgeInsets.all(50),
               child: Square(
                 size: 200,
@@ -84,17 +83,17 @@ void main() {
 
   testWidgets('mask which contains layer throws debug error', (tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: WidgetMask(
           blendMode: BlendMode.difference,
-          mask: const Center(
+          mask: Center(
             child: RepaintBoundary(
               child: Square(
                 color: Colors.white,
               ),
             ),
           ),
-          child: const Square(
+          child: Square(
             size: 200,
             color: Colors.green,
           ),
@@ -107,15 +106,15 @@ void main() {
 
   testWidgets('child which contains layer', (tester) async {
     await tester.pumpWidget(
-      Center(
+      const Center(
         child: WidgetMask(
           blendMode: BlendMode.difference,
-          mask: const Center(
+          mask: Center(
             child: Square(
               color: Colors.white,
             ),
           ),
-          child: const RepaintBoundary(
+          child: RepaintBoundary(
             child: Square(
               size: 200,
               color: Colors.green,
@@ -135,16 +134,16 @@ void main() {
     'child with save layer, which contains layer throws debug error',
     (tester) async {
       await tester.pumpWidget(
-        Center(
+        const Center(
           child: WidgetMask(
             childSaveLayer: true,
             blendMode: BlendMode.difference,
-            mask: const Center(
+            mask: Center(
               child: Square(
                 color: Colors.white,
               ),
             ),
-            child: const RepaintBoundary(
+            child: RepaintBoundary(
               child: Square(
                 size: 200,
                 color: Colors.green,
