@@ -1,3 +1,7 @@
+## 1.0.0+0
+
+**DOCS**: add reference to `cbl`
+
 ## 1.0.0
 
 **FEAT**: add `SaveLayer` widget

@@ -9,6 +9,21 @@ surfaces.
     <img width="500" src="https://raw.githubusercontent.com/blaugold/widget_mask/main/docs/images/example_screenshot.jpg?v=1">
 </p>
 
+---
+
+If you're looking for a **database solution**, check out
+[`cbl`](https://pub.dev/packages/cbl), another project of mine. It brings
+Couchbase Lite to **standalone Dart** and **Flutter**, with support for:
+
+- **Full-Text Search**,
+- **Expressive Queries**,
+- **Data Sync**,
+- **Change Notifications**
+
+and more.
+
+---
+
 # Limitations
 
 Widgets that are used as children of `WidgetMask` or `SaveLayer` must not need

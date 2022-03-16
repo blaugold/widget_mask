@@ -2,7 +2,7 @@ name: widget_mask
 description:
   Use a widget to mask and blend another widget, for example to imprint text
   onto surfaces.
-version: 1.0.0
+version: 1.0.0+0
 repository: https://github.com/blaugold/widget_mask
 issue_tracker: https://github.com/blaugold/widget_mask/issues
 
